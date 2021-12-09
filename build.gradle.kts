@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "org.veupathdb.lib"
-version = "1.0.0"
+version = "1.0.2"
 
 repositories {
   mavenCentral()
@@ -87,10 +87,7 @@ publishing {
 
   publications {
     create<MavenPublication>("maven") {
-      artifacts {
-        artifact("build/libs/hash-id-$version-release.jar")
-        artifact("build/libs/hash-id-$version-sources.jar")
-      }
+      from(components["java"])
 
       pom {
         name.set("HashID")

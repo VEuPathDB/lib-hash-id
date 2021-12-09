@@ -12,4 +12,4 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 16
-      - run: ./gradle test --info
+      - run: ./gradlew test --info

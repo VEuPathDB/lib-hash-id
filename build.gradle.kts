@@ -1,6 +1,8 @@
 plugins {
   kotlin("jvm") version "1.6.0"
+  id("org.jetbrains.dokka") version "1.6.0"
   `maven-publish`
+  `java-library`
 }
 
 group = "org.veupathdb.lib"
@@ -11,6 +13,8 @@ repositories {
 }
 
 dependencies {
+  dokkaJekyllPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.6.0")
+
   implementation(kotlin("stdlib"))
 
   testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
@@ -19,12 +23,33 @@ dependencies {
 
 tasks.named<Test>("test") {
   useJUnitPlatform()
+  testLogging {
+    events.addAll(listOf(org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED,
+      org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED,
+      org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT,
+      org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR,
+      org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED))
+
+    exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    showExceptions = true
+    showCauses = true
+    showStackTraces = true
+    showStandardStreams = true
+    enableAssertions = true
+  }
+}
+
+java {
+  withSourcesJar()
 }
 
 kotlin {
   jvmToolchain {
     (this as JavaToolchainSpec).languageVersion.set(JavaLanguageVersion.of(16))
   }
+}
+
+tasks.withType(org.gradle.jvm.tasks.Jar::class.java).all {
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).all {
@@ -37,20 +62,34 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).all 
 }
 
 tasks.register("release", proguard.gradle.ProGuardTask::class.java) {
-  dependsOn(":jar")
+  dependsOn(":build")
 
   configuration("bld/proguard-rules.pro")
 
   libraryjars(files(configurations.compileClasspath.get().files))
 
-  injars("build/libs/spigot-block-compression-$version-all.jar")
-  outjars("build/libs/spigot-block-compression-$version-release.jar")
+  injars("build/libs/hash-id-${project.version}.jar")
+  outjars("build/libs/hash-id-$version-release.jar")
 }
 
 publishing {
+  repositories {
+    maven {
+      name = "GitHub"
+      url = uri("https://maven.pkg.github.com/veupathdb/lib-hash-id")
+      credentials {
+        username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
+        password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
+      }
+    }
+  }
+
   publications {
     create<MavenPublication>("maven") {
-      from(components["kotlin"])
+      artifacts {
+        artifact("build/libs/hash-id-$version-release.jar")
+        artifact("build/libs/hash-id-$version-sources.jar")
+      }
 
       pom {
         name.set("HashID")

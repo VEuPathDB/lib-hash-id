@@ -1,0 +1,5 @@
+= HashID
+
+Provides a type for a 128-bit hash based identifier.
+
+Intended purpose is job collision detection based on MD5 hashes of job configurations.

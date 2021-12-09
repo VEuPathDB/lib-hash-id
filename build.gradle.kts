@@ -49,7 +49,8 @@ kotlin {
   }
 }
 
-tasks.withType(org.gradle.jvm.tasks.Jar::class.java).all {
+tasks.withType(PublishToMavenRepository::class.java).all {
+  dependsOn(":release")
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).all {

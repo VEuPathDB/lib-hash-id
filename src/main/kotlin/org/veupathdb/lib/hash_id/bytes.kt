@@ -25,7 +25,7 @@ internal inline fun renderBytes(value: ByteArray, lowercase: Boolean = true): St
   var rp = 0
 
   for (vp in 0..15) {
-    when (val v = value[vp]) {
+    when (value[vp]) {
       in 0..127 -> {
         raw[rp++] = renderByte(value[vp].toInt() / 16, lowercase)
         raw[rp++] = renderByte(value[vp].toInt() % 16, lowercase)

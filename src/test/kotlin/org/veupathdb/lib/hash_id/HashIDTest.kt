@@ -103,7 +103,7 @@ internal class HashIDTest {
     @DisplayName("returns a HashID wrapping the correct MD5 of the given string")
     fun test1() {
       val input = "I'm a banana"
-      val md5   = "0af797fcfb5878029a003b65960d1d30"
+      val md5   = "0AF797FCFB5878029A003B65960D1D30"
 
       assertEquals(md5, HashID.ofMD5(input).toString())
     }
@@ -117,7 +117,7 @@ internal class HashIDTest {
     @DisplayName("returns a HashID wrapping the correct MD5 of the contents of the given input stream")
     fun test1() {
       val input  = "Bugger all".byteInputStream()
-      val output = "7478d5b72648205d8585020deeb4b06e"
+      val output = "7478D5B72648205D8585020DEEB4B06E"
 
       assertEquals(output, HashID.ofMD5(input).string)
     }
@@ -125,7 +125,6 @@ internal class HashIDTest {
     @Test
     @DisplayName("closes the input stream when close is set to true")
     fun test2() {
-      val stream = "Bugger all".byteInputStream()
       val input  = mockk<BufferedInputStream> {
         every { close() } answers {}
         every { read(any()) } answers {
@@ -144,9 +143,9 @@ internal class HashIDTest {
           10
         }
       }
-      val output = "7478d5b72648205d8585020deeb4b06e"
+      val output = "7478D5B72648205D8585020DEEB4B06E"
 
-      assertEquals(output, HashID.ofMD5(input, true).string)
+      assertEquals(output, HashID.ofMD5(input, close = true).string)
 
       verify(atLeast = 1, atMost = 1) { input.close() }
     }
@@ -163,7 +162,7 @@ internal class HashIDTest {
     @DisplayName("returns a HashID wrapping the correct MD5 of the toString value of the given object")
     fun test1() {
       val input = Derp()
-      val output = "36db6453f801a4e5bc13e138e7f0ac9e"
+      val output = "36DB6453F801A4E5BC13E138E7F0AC9E"
 
       assertEquals(output, HashID.ofMD5(input).string)
     }

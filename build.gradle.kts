@@ -1,6 +1,6 @@
 plugins {
-  kotlin("jvm") version "1.6.0"
-  id("org.jetbrains.dokka") version "1.6.0"
+  kotlin("jvm") version "1.6.10"
+  id("org.jetbrains.dokka") version "1.6.10"
   `maven-publish`
   `java-library`
 }
@@ -44,12 +44,6 @@ java {
   withJavadocJar()
 }
 
-kotlin {
-  jvmToolchain {
-    (this as JavaToolchainSpec).languageVersion.set(JavaLanguageVersion.of(16))
-  }
-}
-
 tasks.withType(PublishToMavenRepository::class.java).all {
   dependsOn(":release")
 }
@@ -58,8 +52,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).all 
   this.requiredServices
 
   kotlinOptions {
-    jvmTarget = "16"
-    freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+    jvmTarget = "1.8"
   }
 }
 

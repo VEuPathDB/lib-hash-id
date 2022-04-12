@@ -2,7 +2,6 @@ package org.veupathdb.lib.hash_id
 
 import java.io.BufferedInputStream
 import java.io.InputStream
-import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 
 @Suppress("NOTHING_TO_INLINE")
@@ -37,6 +36,6 @@ internal inline fun InputStream.md5(close: Boolean = false): ByteArray {
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun String.md5(): ByteArray =
   with(MessageDigest.getInstance("MD5")) {
-    update(toByteArray(StandardCharsets.UTF_8))
+    update(toByteArray())
     digest()
   }

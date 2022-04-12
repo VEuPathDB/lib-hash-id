@@ -1,5 +1,52 @@
 = HashID
+:source-highlighter: highlightjs
 
 Provides a type for a 128-bit hash based identifier.
 
-Intended purpose is job collision detection based on MD5 hashes of job configurations.
+Intended purpose is job collision detection based on MD5 hashes of job
+configurations.
+
+HashIDs are safe to use in both `Map` and `Set` implementations.
+
+== Usage
+
+=== Getting a HashID
+
+.From a hash string
+[source, kotlin]
+----
+val id = HashID.ofHash("36db6453f801a4e5bc13e138e7f0ac9e")
+----
+
+.From a byte array
+[source, kotlin]
+----
+val id = HashID.ofHash(byteArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6))
+----
+
+.From an MD5
+[source, kotlin]
+----
+// From a String
+val id = HashID.ofMD5("some string to hash")
+
+// From an InputStream
+val id = HashID.ofMD5(myInputStream)
+
+// From arbitrary objects
+val id = HashID.ofMD5(Object())
+----
+
+=== Getting the Values
+
+.Hex String
+[source, kotlin]
+----
+val hexString = myHashID.string
+----
+
+.Byte Array
+[source, kotlin]
+----
+val byteArray = myHashID.bytes
+----

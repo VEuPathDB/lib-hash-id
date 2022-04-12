@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.io.BufferedInputStream
-import java.io.InputStream
 import java.math.BigInteger
 
 @DisplayName("HashID")
@@ -56,7 +55,7 @@ internal class HashIDTest {
     @DisplayName("Correctly parses the input string into a byte array.")
     fun test1() {
       for (i in hexStringsLower.indices) {
-        assertArrayEquals(testBytes[i], HashID(hexStringsLower[i]).bytes)
+        assertArrayEquals(testBytes[i], HashID.ofHash(hexStringsLower[i]).bytes)
       }
     }
 
@@ -67,13 +66,13 @@ internal class HashIDTest {
       @Test
       @DisplayName("the input string length is not 32")
       fun `throws-iae-on-input-length-not-32`() {
-        assertThrows<IllegalArgumentException> { HashID("FFFF") }
+        assertThrows<IllegalArgumentException> { HashID.ofHash("FFFF") }
       }
 
       @Test
       @DisplayName("the input string is not a valid hex string")
       fun `throws-iae-on-non-hex-input`() {
-        assertThrows<IllegalArgumentException> { HashID("Apples are the best kind of food") }
+        assertThrows<IllegalArgumentException> { HashID.ofHash("Apples are the best kind of food") }
       }
     }
   }
@@ -90,7 +89,7 @@ internal class HashIDTest {
       @DisplayName("the input is a non-null array of exactly 16 bytes")
       fun `returns-new-instance`() {
         assertDoesNotThrow {
-          hexStringsUpper.indices.forEach { assertEquals(hexStringsLower[it], HashID(testBytes[it]).string) }
+          hexStringsUpper.forEachIndexed { i, it ->  assertEquals(it, HashID.ofHash(testBytes[i]).string) }
         }
       }
     }

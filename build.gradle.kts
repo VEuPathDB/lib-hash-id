@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "org.veupathdb.lib"
-version = "1.0.2"
+version = "2.0.0"
 
 repositories {
   mavenCentral()
@@ -41,6 +41,7 @@ tasks.named<Test>("test") {
 
 java {
   withSourcesJar()
+  withJavadocJar()
 }
 
 kotlin {

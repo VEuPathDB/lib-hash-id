@@ -1,8 +1,6 @@
 package org.veupathdb.lib.hash_id
 
-import java.io.BufferedInputStream
 import java.io.InputStream
-import java.security.MessageDigest
 
 /**
  * 128-bit ID Represented as a 32 digit hash string.
@@ -10,155 +8,140 @@ import java.security.MessageDigest
  * This value is safe to use in [Sets][Set] and [Maps][Map].
  *
  * @author Elizabeth Harper
- * @since  v1.0.0
+ * @since  v2.0.0
  */
-class HashID {
-
-  private val rawBytes: ByteArray
+sealed interface HashID {
 
   /**
    * The URL-safe, stringified form of this [HashID].
    *
    * This value will be a 32 digit hex string.
    */
-  val string
-    get() = renderBytes(rawBytes)
+  val string: String
 
   /**
    * A copy of the backing byte array for this [HashID].
+   *
+   * This value will be 16 bytes in length.
    */
-  val bytes
-    get() = rawBytes.copyOf()
-
-  /**
-   * Constructs a new [HashID] backed by a copy of the given input byte array.
-   *
-   * The input byte array must have a length of exactly 16 bytes.
-   *
-   * @param bytes Byte array to back the new [HashID].
-   *
-   * @throws IllegalArgumentException If the input byte array does not contain
-   * exactly 16 bytes.
-   * @throws NullPointerException If the input byte array is `null`.
-   */
-  constructor(bytes: ByteArray) {
-    if (bytes.size != 16)
-      throw IllegalArgumentException()
-
-    rawBytes = bytes.copyOf()
-  }
-
-  /**
-   * Constructs a new [HashID] backed by a byte array parsed from the given hex
-   * string.
-   *
-   * If the given string is not a valid base16 string, an exception will be
-   * thrown.
-   *
-   * If the given string is not exactly 32 characters in length, an exception
-   * will be thrown.
-   *
-   * @param stringValue A 32 digit hex string to back this [HashID].
-   *
-   * @throws IllegalArgumentException If the input value is not a valid hex
-   * string of exactly 32 characters.
-   * @throws NullPointerException If the input value is `null`.
-   */
-  constructor(stringValue: String) {
-    if (stringValue.length != 32)
-      throw IllegalArgumentException()
-
-    rawBytes = parseBytes(stringValue)
-  }
-
-  /**
-   * The URL-safe, stringified form of this [HashID] optionally in uppercase.
-   *
-   * This value will be a 32 digit hex string.
-   *
-   * @param lowercase If `true` (the default value), the letter characters in
-   * the returned string will be lowercase.  If `false`, the letter characters
-   * in the returned string will be uppercase.
-   */
-  fun getString(lowercase: Boolean) {
-    renderBytes(rawBytes, lowercase)
-  }
-
-  /**
-   * Returns the stringified form of this [HashID].
-   *
-   * @return Stringified form of this [HashID].
-   */
-  override fun toString() =
-    renderBytes(rawBytes)
-
-  override fun equals(other: Any?) =
-    when (other) {
-      is HashID -> rawBytes.contentEquals(other.rawBytes)
-      else      -> false
-    }
-
-  override fun hashCode() = rawBytes.contentHashCode()
+  val bytes: ByteArray
 
   companion object {
-    /**
-     * Creates a new [HashID] instance wrapping the MD5 hash of the given value.
-     *
-     * @return The new [HashID].
-     */
-    @JvmStatic
-    fun ofMD5(value: String): HashID {
-      val digest = MessageDigest.getInstance("MD5")
-      digest.update(value.toByteArray())
-      return HashID(digest.digest())
-    }
 
     /**
-     * Creates a new [HashID] instance wrapping the MD5 hash of the given value.
+     * Creates a new [HashID] instance from the given hash string.
      *
-     * @return The new [HashID].
+     * The input string must be a valid hex string of exactly 32 characters.
+     *
+     * @param value Hash string.
+     *
+     * @return New [HashID] instance wrapping the given hash string.
+     *
+     * @throws IllegalArgumentException If the input string is not exactly 32
+     * characters in length, or if the input string contains characters that
+     * are not valid hex digits.
+     */
+    @JvmStatic
+    fun ofHash(value: String): HashID {
+      if (value.length != 32)
+        throw IllegalArgumentException()
+
+      return HashIDImpl(value, parseBytes(value))
+    }
+
+
+    /**
+     * Creates a new [HashID] instance from the given byte array.
+     *
+     * The input array must be exactly 16 bytes in length.
+     *
+     * @param value Hash bytes.
+     *
+     * @param lowercase If set to `true`, the wrapped hash string will be all
+     * lowercase hex digits.  If set to `false` the wrapped string will be all
+     * uppercase hex digits.
+     *
+     * Defaults to `false`
+     *
+     * @return New [HashID] instance wrapping the given byte array.
+     *
+     * @throws IllegalArgumentException If the input array is not exactly 16
+     * bytes in length.
      */
     @JvmStatic
     @JvmOverloads
-    fun ofMD5(value: InputStream, close: Boolean = false): HashID {
-      val digest = MessageDigest.getInstance("MD5")
+    fun ofHash(value: ByteArray, lowercase: Boolean = false): HashID {
+      if (value.size != 16)
+        throw IllegalArgumentException()
 
-      val stream = if (value is BufferedInputStream) value else BufferedInputStream(value)
-      val buffer = ByteArray(8192)
-
-      if (close) {
-        stream.use {
-          while (true) {
-            val red = it.read(buffer)
-
-            digest.update(buffer, 0, red)
-
-            if (red < buffer.size) {
-              break
-            }
-          }
-        }
-      } else {
-        while (true) {
-          val red = stream.read(buffer)
-
-          digest.update(buffer, 0, red)
-
-          if (red < buffer.size) {
-            break
-          }
-        }
-      }
-
-      return HashID(digest.digest())
+      return HashIDImpl(renderBytes(value, lowercase), value)
     }
 
     /**
-     * Creates a new [HashID] instance wrapping the MD5 hash of the given value.
+     * Creates a new [HashID] instance wrapping the MD5 hash of the given input
+     * string.
      *
-     * @return The new [HashID].
+     * @param value String to hash.
+     *
+     * @param lowercase If set to `true`, the wrapped hash string will be all
+     * lowercase hex digits.  If set to `false` the wrapped string will be all
+     * uppercase hex digits.
+     *
+     * Defaults to `false`
+     *
+     * @return New [HashID] instance wrapping the MD5 hash of the given input
+     * string.
      */
     @JvmStatic
-    fun ofMD5(value: Any) = ofMD5(value.toString())
+    @JvmOverloads
+    fun ofMD5(value: String, lowercase: Boolean = false): HashID =
+      value.md5().let { HashIDImpl(renderBytes(it, lowercase), it) }
+
+
+    /**
+     * Creates a new [HashID] instance wrapping the MD5 hash of the contents of
+     * the given [InputStream].
+     *
+     * @param value [InputStream] whose contents will be hashed.
+     *
+     * @param lowercase If set to `true`, the wrapped hash string will be all
+     * lowercase hex digits.  If set to `false` the wrapped string will be all
+     * uppercase hex digits.
+     *
+     * Defaults to `false`
+     *
+     * @param close Whether the given [InputStream] should be closed upon
+     * completion of this method.
+     *
+     * @return New [HashID] instance wrapping the MD5 hash of the contents of
+     * the given [InputStream].
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun ofMD5(value: InputStream, lowercase: Boolean = false, close: Boolean = false): HashID =
+      value.md5(close).let { HashIDImpl(renderBytes(it, lowercase), it) }
+
+
+    /**
+     * Creates a new [HashID] instance wrapping the MD5 hash of the
+     * [Object.toString] value of the given object.
+     *
+     * This method is a convenience over `ofMD5(foo.toString())`.
+     *
+     * @param value Object to hash.
+     *
+     * @param lowercase If set to `true`, the wrapped hash string will be all
+     * lowercase hex digits.  If set to `false` the wrapped string will be all
+     * uppercase hex digits.
+     *
+     * Defaults to `false`
+     *
+     * @return New [HashID] instance wrapping the MD5 hash of the `toString()`
+     * value of the input object.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun ofMD5(value: Any, lowercase: Boolean = false): HashID =
+      ofMD5(value.toString(), lowercase)
   }
 }

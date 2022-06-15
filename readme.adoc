@@ -1,5 +1,43 @@
 = HashID
 
-Provides a type for a 128-bit hash based identifier.
+Provides a type for a collidable 128-bit hash based unique identifier.
 
-Intended purpose is job collision detection based on MD5 hashes of job configurations.
+Intended purpose is job collision detection based on MD5 hashes of job
+configurations.
+
+link:src/main/kotlin/org/veupathdb/lib/hash_id/HashID.kt[HashID] is effectively
+just a "new type" over a 128bit integer stored as an array of 16 bytes.
+
+This type guarantees that its value is a valid MD5 hash value and allows
+consuming code to rely on that guarantee and make safe assumptions and calls
+without needing to verify the contents of the ID.
+
+
+== Usage
+
+[source, kotlin]
+----
+dependencies {
+  implementation("org.veupathdb.lib:hash-id:1.1.0")
+}
+----
+
+=== Getting a New `HashID`
+
+.From a raw value
+[source, java]
+----
+var myID_1 = HashID.ofMD5("my raw value");
+
+var myID_2 = HashID.ofMD5(someInputStream);
+
+var myID_3 = HashID.ofMD5(someStringifiableValue);
+----
+
+.From a hash value
+[source, java]
+----
+var myID_1 = new HashID(myMD5String);
+
+var myID_2 = new HashID(myMD5ByteArray);
+----

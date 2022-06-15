@@ -1,13 +1,31 @@
 package org.veupathdb.lib.hash_id
 
-import java.io.BufferedInputStream
 import java.io.InputStream
 import java.security.MessageDigest
 
 /**
- * 128-bit ID Represented as a 32 digit hash string.
+ * Hash/Digest Based Identifier.
+ *
+ * [HashID] is a 128bit hash of a value to be used as an intentionally
+ * collidable unique identifier based on the MD5 hash of a value or
+ * configuration.
+ *
+ * This type is effectively a "new type" over `byte[16]` which provides methods
+ * for rendering and dealing with the bytes as a String.
+ *
+ * This type allows users to make guarantees about the values they are given as
+ * a [HashID] can only be constructed via a valid hash either by hex string or
+ * by raw bytes.
+ *
+ * Another way to think about the [HashID] type is effectively a wrapper around
+ * a 128bit integer.  As this value is effectively an integer it can be stored
+ * in ways that may be more efficient or cost-effective than a raw string such
+ * as in a database or in binary files.
  *
  * This value is safe to use in [Sets][Set] and [Maps][Map].
+ *
+ * The contents of this class are simply a `byte[16]` array and methods for
+ * rendering/retrieving that value.
  *
  * @author Elizabeth Harper
  * @since  v1.0.0
@@ -20,6 +38,9 @@ class HashID {
    * The URL-safe, stringified form of this [HashID].
    *
    * This value will be a 32 digit hex string.
+   *
+   * **NOTE**: This value is not cached, and is calculated on every call to this
+   * property/getter.
    */
   val string
     get() = renderBytes(rawBytes)
@@ -102,7 +123,8 @@ class HashID {
 
   companion object {
     /**
-     * Creates a new [HashID] instance wrapping the MD5 hash of the given value.
+     * Calculates the MD5 hash of the given value and wraps that hash in a new
+     * [HashID] instance.
      *
      * @return The new [HashID].
      */
@@ -114,7 +136,8 @@ class HashID {
     }
 
     /**
-     * Creates a new [HashID] instance wrapping the MD5 hash of the given value.
+     * Calculates the MD5 hash value of the contents of the given [InputStream]
+     * and wraps that hash in a new [HashID] instance.
      *
      * @return The new [HashID].
      */
@@ -123,7 +146,7 @@ class HashID {
     fun ofMD5(value: InputStream, close: Boolean = false): HashID {
       val digest = MessageDigest.getInstance("MD5")
 
-      val stream = if (value is BufferedInputStream) value else BufferedInputStream(value)
+      val stream = value.buffered()
       val buffer = ByteArray(8192)
 
       if (close) {
@@ -154,7 +177,13 @@ class HashID {
     }
 
     /**
-     * Creates a new [HashID] instance wrapping the MD5 hash of the given value.
+     * Calculates the MD5 hash value of the stringified form of the given value
+     * and wraps that hash in a new [HashID] instance.
+     *
+     * This method is a simple convenience method over:
+     * ```
+     *   HashID.ofMD5(myType.toString())
+     * ```
      *
      * @return The new [HashID].
      */

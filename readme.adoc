@@ -1,12 +1,12 @@
 = HashID
 
-Provides a type for a collidable 128-bit hash based unique identifier.
+Provides a type for a collidable 128-bit digest based identifier.
 
 Intended purpose is job collision detection based on MD5 hashes of job
 configurations.
 
 link:src/main/kotlin/org/veupathdb/lib/hash_id/HashID.kt[HashID] is effectively
-just a "new type" over a 128bit integer stored as an array of 16 bytes.
+just a "new type" over a 128-bit integer stored as an array of 16 bytes.
 
 This type guarantees that its value is a valid MD5 hash value and allows
 consuming code to rely on that guarantee and make safe assumptions and calls
@@ -27,17 +27,47 @@ dependencies {
 .From a raw value
 [source, java]
 ----
+// Create a HashID by MD5 hashing a string value.
 var myID_1 = HashID.ofMD5("my raw value");
 
+// Create a HashID by MD5 hashing the contents of an InputStream.
 var myID_2 = HashID.ofMD5(someInputStream);
 
+// Create a HashID by MD5 hashing the stringified form of an arbitrary object.
 var myID_3 = HashID.ofMD5(someStringifiableValue);
 ----
 
 .From a hash value
 [source, java]
 ----
+// Construct a hash ID from a valid Hex string
 var myID_1 = new HashID(myMD5String);
 
+// Construct a hash ID from a valid `byte[16]` array.
 var myID_2 = new HashID(myMD5ByteArray);
 ----
+
+=== Validation
+
+The `HashID` type validates its wrapped value on construction to ensure that it
+cannot contain an invalid value.  This means that you can rely on the fact that
+if your code was called, passing in a `HashID` instance, the wrapped value is,
+in fact, a valid 128-bit digest.
+
+.Invalid Instantiation
+[source, java]
+----
+try {
+  var myID_1 = new HashID("Hello world!");
+} catch (IllegalArgumentException e) {
+  System.out.println("Oops, can't construct a HashID from an invalid string.")
+}
+
+try {
+  var myID_2 = new HashID(new byte[19]);
+} catch (IllegalArgumentException e) {
+  System.out.println("Oops, can't construct a HashID from an invalid byte array.")
+}
+
+----
+

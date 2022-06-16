@@ -1,16 +1,23 @@
 = HashID
 
-Provides a type for a collidable 128-bit digest based identifier.
+Provides an implementation of a concrete type for a collidable 128-bit digest
+based identifier that is safer and more robust than passing around a raw hash
+string.
 
-Intended purpose is job collision detection based on MD5 hashes of job
-configurations.
+== Reasoning
 
-link:src/main/kotlin/org/veupathdb/lib/hash_id/HashID.kt[HashID] is effectively
-just a "new type" over a 128-bit integer stored as an array of 16 bytes.
+link:src/main/kotlin/org/veupathdb/lib/hash_id/HashID.kt[`HashID`] guarantees
+that its value is a valid MD5 hash value and allows consuming code to rely on
+that guarantee and make safe assumptions and calls without needing to verify the
+contents of the ID.
 
-This type guarantees that its value is a valid MD5 hash value and allows
-consuming code to rely on that guarantee and make safe assumptions and calls
-without needing to verify the contents of the ID.
+This effectively eliminates the class of bugs that could arise from a missed
+validation on a raw input string or byte array.
+
+In addition to the standard constructors taking a hex string hash, or a raw byte
+array, `HashID` provides convenience methods for generating new `HashID`
+instances by generating an MD5 hash of a given arbitrary input, including from
+`InputStream`.
 
 
 == Usage
@@ -21,6 +28,7 @@ dependencies {
   implementation("org.veupathdb.lib:hash-id:1.1.0")
 }
 ----
+
 
 === Getting a New `HashID`
 
@@ -47,6 +55,7 @@ var myID_1 = new HashID(myMD5String);
 var myID_2 = new HashID(myMD5ByteArray);
 ----
 
+
 === Validation
 
 The `HashID` type validates its wrapped value on construction to ensure that it
@@ -69,4 +78,13 @@ try {
   System.out.println("Oops, can't construct a HashID from an invalid byte array.")
 }
 ----
+
+
+== Implementation
+
+`HashID` is effectively just a "new-type" wrapper around an immutable 16 byte
+array that offers methods for accessing the raw value as either the contained
+byte array or as a 32 character hex string.
+
+A `HashID` is safe to use in Sets or as keys in a Map.
 

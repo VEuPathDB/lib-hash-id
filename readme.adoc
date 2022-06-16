@@ -68,6 +68,5 @@ try {
 } catch (IllegalArgumentException e) {
   System.out.println("Oops, can't construct a HashID from an invalid byte array.")
 }
-
 ----
 

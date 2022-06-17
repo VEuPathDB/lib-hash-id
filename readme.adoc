@@ -80,6 +80,20 @@ try {
 ----
 
 
+=== Schema
+
+.Json Schema:
+[source]
+----
+https://raw.githubusercontent.com/VEuPathDB/lib-hash-id/v1.1.0/schema/hash-id.json
+----
+
+.RAML DataType
+[source]
+----
+https://raw.githubusercontent.com/VEuPathDB/lib-hash-id/v1.1.0/schema/hash-id.raml
+----
+
 == Implementation
 
 `HashID` is effectively just a "new-type" wrapper around an immutable 16 byte

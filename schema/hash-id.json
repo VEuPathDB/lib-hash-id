@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HashID",
+  "description": "128-bit digest based identifier.",
+  "type": "string",
+  "minLength": 32,
+  "maxLength": 32,
+  "pattern": "^[\\dA-Fa-f]{32}$"
+}

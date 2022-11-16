@@ -1,6 +1,6 @@
 plugins {
-  kotlin("jvm") version "1.6.0"
-  id("org.jetbrains.dokka") version "1.6.0"
+  kotlin("jvm") version "1.7.21"
+  id("org.jetbrains.dokka") version "1.7.20"
   `maven-publish`
   `java-library`
 }
@@ -13,12 +13,12 @@ repositories {
 }
 
 dependencies {
-  dokkaJekyllPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.6.0")
+  dokkaJekyllPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.7.20")
 
   implementation(kotlin("stdlib"))
 
-  testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
-  testImplementation("io.mockk:mockk:1.12.1")
+  testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
+  testImplementation("io.mockk:mockk:1.13.2")
 }
 
 tasks.named<Test>("test") {
@@ -40,7 +40,11 @@ tasks.named<Test>("test") {
 }
 
 java {
+  targetCompatibility = JavaVersion.VERSION_1_8
+  sourceCompatibility = JavaVersion.VERSION_1_8
+
   withSourcesJar()
+  withJavadocJar()
 }
 
 kotlin {
@@ -57,7 +61,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).all 
   this.requiredServices
 
   kotlinOptions {
-    jvmTarget = "16"
+    jvmTarget = "1.8"
     freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
   }
 }

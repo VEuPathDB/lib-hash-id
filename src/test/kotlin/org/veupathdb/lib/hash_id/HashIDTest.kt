@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.io.BufferedInputStream
-import java.io.InputStream
 import java.math.BigInteger
 
 @DisplayName("HashID")
@@ -88,9 +87,42 @@ internal class HashIDTest {
 
       @Test
       @DisplayName("the input is a non-null array of exactly 16 bytes")
-      fun `returns-new-instance`() {
+      fun `returns-new-instance-eq-16`() {
         assertDoesNotThrow {
           hexStringsUpper.indices.forEach { assertEquals(hexStringsLower[it], HashID(testBytes[it]).string) }
+        }
+      }
+
+      @Test
+      @DisplayName("the input is a non-null array of less than 16 bytes, and greater than 0 bytes")
+      fun `returns-new-instance-lt-16`() {
+        var id: HashID? = null
+        assertDoesNotThrow {
+          // test value "eeffeeffeeffeeffeeffeeffeeffee" (15 bytes)
+          id = HashID("eeffeeffeeffeeffeeffeeffeeffee".hexToByteArray())
+        }
+
+        assertEquals("00eeffeeffeeffeeffeeffeeffeeffee", id!!.string)
+      }
+    }
+
+    @Nested
+    @DisplayName("throws IllegalArgumentException when")
+    internal inner class ThrowsIAE {
+
+      @Test
+      @DisplayName("the input is an empty byte array")
+      fun throwsOnEmptyArray() {
+        assertThrows<IllegalArgumentException> {
+          HashID(ByteArray(0))
+        }
+      }
+
+      @Test
+      @DisplayName("the input array length is greater than 16")
+      fun throwsOnBigArray() {
+        assertThrows<IllegalArgumentException> {
+          HashID(ByteArray(17))
         }
       }
     }

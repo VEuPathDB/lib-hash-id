@@ -1,24 +1,23 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
-  kotlin("jvm") version "1.7.21"
-  id("org.jetbrains.dokka") version "1.7.20"
+  alias(libs.plugins.kotlin)
+  alias(libs.plugins.dokka)
   `maven-publish`
-  `java-library`
 }
 
 group = "org.veupathdb.lib"
-version = "1.1.0"
+version = "1.2.0"
 
 repositories {
   mavenCentral()
 }
 
 dependencies {
-  dokkaJekyllPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.7.20")
-
-  implementation(kotlin("stdlib"))
-
-  testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
-  testImplementation("io.mockk:mockk:1.13.2")
+  testImplementation(libs.junit.api)
+  testRuntimeOnly(libs.junit.engine)
+  testRuntimeOnly(libs.junit.launcher)
+  testImplementation(libs.mockk)
 }
 
 tasks.named<Test>("test") {
@@ -40,41 +39,17 @@ tasks.named<Test>("test") {
 }
 
 java {
-  targetCompatibility = JavaVersion.VERSION_1_8
-  sourceCompatibility = JavaVersion.VERSION_1_8
+  targetCompatibility = JavaVersion.VERSION_17
+  sourceCompatibility = JavaVersion.VERSION_17
 
   withSourcesJar()
   withJavadocJar()
 }
 
 kotlin {
-  jvmToolchain {
-    (this as JavaToolchainSpec).languageVersion.set(JavaLanguageVersion.of(16))
+  compilerOptions {
+    jvmTarget = JvmTarget.JVM_17
   }
-}
-
-tasks.withType(PublishToMavenRepository::class.java).all {
-  dependsOn(":release")
-}
-
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java).all {
-  this.requiredServices
-
-  kotlinOptions {
-    jvmTarget = "1.8"
-    freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
-  }
-}
-
-tasks.register("release", proguard.gradle.ProGuardTask::class.java) {
-  dependsOn(":build")
-
-  configuration("bld/proguard-rules.pro")
-
-  libraryjars(files(configurations.compileClasspath.get().files))
-
-  injars("build/libs/hash-id-${project.version}.jar")
-  outjars("build/libs/hash-id-$version-release.jar")
 }
 
 publishing {

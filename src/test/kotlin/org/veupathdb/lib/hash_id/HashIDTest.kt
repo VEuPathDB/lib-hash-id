@@ -92,18 +92,6 @@ internal class HashIDTest {
           hexStringsUpper.indices.forEach { assertEquals(hexStringsLower[it], HashID(testBytes[it]).string) }
         }
       }
-
-      @Test
-      @DisplayName("the input is a non-null array of less than 16 bytes, and greater than 0 bytes")
-      fun `returns-new-instance-lt-16`() {
-        var id: HashID? = null
-        assertDoesNotThrow {
-          // test value "eeffeeffeeffeeffeeffeeffeeffee" (15 bytes)
-          id = HashID("eeffeeffeeffeeffeeffeeffeeffee".hexToByteArray())
-        }
-
-        assertEquals("00eeffeeffeeffeeffeeffeeffeeffee", id!!.string)
-      }
     }
 
     @Nested
@@ -115,6 +103,14 @@ internal class HashIDTest {
       fun throwsOnEmptyArray() {
         assertThrows<IllegalArgumentException> {
           HashID(ByteArray(0))
+        }
+      }
+
+      @Test
+      @DisplayName("the input array length is less than 16")
+      fun throwsOnSmallArray() {
+        assertThrows<IllegalArgumentException> {
+          HashID(ByteArray(15))
         }
       }
 

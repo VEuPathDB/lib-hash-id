@@ -58,18 +58,17 @@ class HashID {
    *
    * @param bytes Byte array to back the new [HashID].
    *
-   * @throws IllegalArgumentException If the input byte array contains greater
-   * than 16 bytes, or is empty.
+   * @throws IllegalArgumentException If the input byte array length is not
+   * exactly 16.
    * @throws NullPointerException If the input byte array is `null`.
    */
   constructor(bytes: ByteArray) {
     if (bytes.size > 16)
       throw IllegalArgumentException("raw digest bit length is greater than 128")
-    if (bytes.isEmpty())
-      throw IllegalArgumentException("raw digest bit length is 0")
+    if (bytes.size < 16)
+      throw IllegalArgumentException("raw digest bit length is less than 128")
 
-    rawBytes = ByteArray(16)
-    bytes.copyInto(rawBytes, 16 - bytes.size)
+    rawBytes = bytes.copyOf()
   }
 
   /**
